@@ -27,7 +27,7 @@ const news_route = (app) => {
   // start maintain speed
   app.get("/api/get-length-categories-popular-news", handle.countLengthOfCategoriesAndgetPopularNews);
   app.get("/api/categories-home",handle.GetByCategoriesInHome)
-  app.get(
+  app.post(
     "/api/categories/:startIndex/:endIndex",
     handle.getByCategories
   );
