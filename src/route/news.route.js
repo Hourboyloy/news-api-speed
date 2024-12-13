@@ -22,7 +22,7 @@ const news_route = (app) => {
 
   app.get("/api/admin-get-all", handle.admingetAll);
   app.get("/api/user-get-all", handle.usergetAll);
-  app.get("/api/getone/:id", handle.getOne);
+  app.get("/api/get-data/:id", handle.getData);
 
   // start maintain speed
   app.get("/api/get-length-categories-popular-news", handle.countLengthOfCategoriesAndgetPopularNews);
