@@ -350,8 +350,8 @@ const countLengthOfCategoriesAndgetPopularNews = async (req, res) => {
     res.json({
       lengthOfSports: lengthOfSports[0]?.length || 0,
       lengthOfEntertainment: lengthOfEntertainment[0]?.length || 0,
-      lifes: lifes[0]?.length || 0,
-      technology: technology[0]?.length || 0,
+      lengthOfLifes: lifes[0]?.length || 0,
+      lengthOfTechnology: technology[0]?.length || 0,
       popularNews,
     });
   } catch (error) {
