@@ -289,7 +289,7 @@ const GetByCategoriesInHome = async (req, res) => {
   }
 };
 
-const getByCategoriesSports = async (req, res) => {
+const getByCategories = async (req, res) => {
   try {
     const limit = 23;
     const { startIndex, endIndex } = req.params;
@@ -301,7 +301,7 @@ const getByCategoriesSports = async (req, res) => {
     const resultLimit = Math.min(end - start + 1, limit);
 
     const sports = await newsmodel.aggregate([
-      { $match: { isVisible: 1, category: "កីឡា" } },
+      { $match: { isVisible: 1, category: req.body.categoryname } },
       { $sort: { createdAt: -1 } },
       { $skip: start },
       { $limit: resultLimit },
@@ -1057,7 +1057,7 @@ const editReply = async (req, res) => {
 
 module.exports = {
   countLengthOfCategoriesAndgetPopularNews,
-  getByCategoriesSports,
+  getByCategories,
   GetByCategoriesInHome,
   increaseViewer,
   deleteNews,

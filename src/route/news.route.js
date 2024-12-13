@@ -28,8 +28,8 @@ const news_route = (app) => {
   app.get("/api/get-length-categories-popular-news", handle.countLengthOfCategoriesAndgetPopularNews);
   app.get("/api/categories-home",handle.GetByCategoriesInHome)
   app.get(
-    "/api/categories-sports/:startIndex/:endIndex",
-    handle.getByCategoriesSports
+    "/api/categories/:startIndex/:endIndex",
+    handle.getByCategories
   );
   // end maintain speed
 
