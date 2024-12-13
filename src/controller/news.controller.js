@@ -300,14 +300,14 @@ const getByCategories = async (req, res) => {
     // Ensure total results do not exceed the limit (23)
     const resultLimit = Math.min(end - start + 1, limit);
 
-    const sports = await newsmodel.aggregate([
+    const list = await newsmodel.aggregate([
       { $match: { isVisible: 1, category: req.body.categoryname } },
       { $sort: { createdAt: -1 } },
       { $skip: start },
       { $limit: resultLimit },
     ]);
 
-    res.json({ sports });
+    res.json({ list });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
