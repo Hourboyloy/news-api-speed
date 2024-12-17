@@ -3,6 +3,8 @@ const multer_cloudinary = require("../middleware/multer_cloudinary");
 const protect_route_admin = require("../security/protect_route_admin");
 
 const news_route = (app) => {
+  //=> for admin
+
   app.post(
     "/api/create-news",
     protect_route_admin,
@@ -21,19 +23,22 @@ const news_route = (app) => {
   app.delete("/api/remove-news/:id", protect_route_admin, handle.deleteNews);
 
   app.get("/api/admin-get-all", handle.admingetAll);
-  app.get("/api/user-get-all", handle.usergetAll);
+
+   app.get("/api/getone/:id", handle.getOne);
+
+  //=> for user client
+  // app.get("/api/user-get-all", handle.usergetAll);
+  app.get("/search-news", handle.search);
   app.get("/api/get-data/:id", handle.getData);
 
   // start maintain speed
-  app.get("/api/get-length-categories-popular-news", handle.countLengthOfCategoriesAndgetPopularNews);
-  app.get("/api/categories-home",handle.GetByCategoriesInHome)
-  app.post(
-    "/api/categories/:startIndex/:endIndex",
-    handle.getByCategories
+  app.get(
+    "/api/get-length-categories-popular-news",
+    handle.countLengthOfCategoriesAndgetPopularNews
   );
+  app.get("/api/categories-home", handle.GetByCategoriesInHome);
+  app.post("/api/categories/:startIndex/:endIndex", handle.getByCategories);
   // end maintain speed
-
-  app.post("/api/increase-viewer/:id", handle.increaseViewer);
 
   // commants
   app.post("/api/news/:newsId/comments", handle.addComment);
@@ -42,7 +47,7 @@ const news_route = (app) => {
     "/api/news/:newsId/comments/:commentId/reply",
     handle.replyToComment
   );
-  
+
   // action
   app.post(
     "/api/news/:newsId/comments/:commentId/like-dislike",
@@ -55,15 +60,17 @@ const news_route = (app) => {
 
   // remove
   app.delete("/api/news/:newsId/comment/:commentId", handle.removeComment);
-  
+
   app.delete(
     "/api/news/:newsId/comment/:commentId/reply/:replyId",
     handle.removeReply
   );
 
   app.put("/news/:newsId/comment/:commentId", handle.editComment);
-  app.put("/news/:newsId/comment/:commentId/replies/:replyId", handle.editReply);
-
+  app.put(
+    "/news/:newsId/comment/:commentId/replies/:replyId",
+    handle.editReply
+  );
 };
 
 module.exports = news_route;

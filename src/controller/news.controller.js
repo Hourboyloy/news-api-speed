@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const newsmodel = require("../modeling/news");
 const cload = require("../cload/cloadinary");
 
+// for admin
 const deleteNews = async (req, res) => {
   try {
     const newsId = req.params.id;
@@ -235,130 +236,6 @@ const updateNews = async (req, res) => {
   }
 };
 
-const usergetAll = async (req, res) => {
-  try {
-    const news = await newsmodel.find({ isVisible: 1 });
-    res.json({
-      message: "successfuly",
-      success: true,
-      status: 200,
-      listNews: news,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const GetByCategoriesInHome = async (req, res) => {
-  try {
-    // Use Promise.all to fetch all categories concurrently
-    const [sportsNews, entertainmentNews, lifes, newestArticles] =
-      await Promise.all([
-        newsmodel
-          .find({ isVisible: 1, category: "កីឡា" })
-          .sort({ createdAt: -1 })
-          .limit(11),
-        newsmodel
-          .find({ isVisible: 1, category: "កម្សាន្ត" })
-          .sort({ createdAt: -1 })
-          .limit(6),
-        newsmodel
-          .find({ isVisible: 1, category: "ជីវិតនិងសង្គម" })
-          .sort({ createdAt: -1 })
-          .limit(5),
-        newsmodel.find({ isVisible: 1 }).sort({ createdAt: -1 }).limit(8),
-      ]);
-
-    res.json({
-      message: "Get success",
-      status: 200,
-      newestArticles,
-      categories: {
-        sports: sportsNews,
-        entertainment: entertainmentNews,
-        lifes: lifes,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "An error occurred while fetching news by categories",
-      status: 500,
-      error: error.message,
-    });
-  }
-};
-
-const getByCategories = async (req, res) => {
-  try {
-    const limit = 23;
-    const { startIndex, endIndex } = req.params;
-    // Ensure startIndex and endIndex are within valid range
-    const start = Math.max(parseInt(startIndex), 0);
-    const end = Math.min(parseInt(endIndex), 99); // Ensure endIndex <= 99
-
-    // Ensure total results do not exceed the limit (23)
-    const resultLimit = Math.min(end - start + 1, limit);
-
-    const list = await newsmodel.aggregate([
-      { $match: { isVisible: 1, category: req.body.categoryname } },
-      { $sort: { createdAt: -1 } },
-      { $skip: start },
-      { $limit: resultLimit },
-    ]);
-
-    res.json({ list });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const countLengthOfCategoriesAndgetPopularNews = async (req, res) => {
-  try {
-    // Using aggregation pipeline to count documents for categories and get popular news
-    const [
-      lengthOfSports,
-      lengthOfEntertainment,
-      lifes,
-      technology,
-      popularNews,
-    ] = await Promise.all([
-      newsmodel.aggregate([
-        { $match: { isVisible: 1, category: "កីឡា" } },
-        { $count: "length" }, // Count documents
-      ]),
-      newsmodel.aggregate([
-        { $match: { isVisible: 1, category: "កម្សាន្ត" } },
-        { $count: "length" }, // Count documents
-      ]),
-      newsmodel.aggregate([
-        { $match: { isVisible: 1, category: "ជីវិតនិងសង្គម" } },
-        { $count: "length" }, // Count documents
-      ]),
-      newsmodel.aggregate([
-        { $match: { isVisible: 1, category: "បច្ចេកវិទ្យា" } },
-        { $count: "length" }, // Count documents
-      ]),
-      newsmodel.aggregate([
-        { $match: { isVisible: 1 } }, // Filter for visible news
-        { $sort: { viewer: -1 } }, // Sort by viewer count descending
-        { $limit: 10 }, // Get top 10 popular news
-      ]),
-    ]);
-
-    res.json({
-      lengthOfSports: lengthOfSports[0]?.length || 0,
-      lengthOfEntertainment: lengthOfEntertainment[0]?.length || 0,
-      lengthOfLifes: lifes[0]?.length || 0,
-      lengthOfTechnology: technology[0]?.length || 0,
-      popularNews,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const admingetAll = async (req, res) => {
   try {
     const news = await newsmodel.find();
@@ -370,89 +247,6 @@ const admingetAll = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-  }
-};
-
-// const getData = async (req, res) => {
-//   try {
-//     const id = req.params.id;
-//     const data = await newsmodel.findById(id);
-//     if (data == null) {
-//       return res.json({
-//         message: "News not found",
-//         success: false,
-//         status: 404,
-//       });
-//     }
-//     const RelatedArticles = await newsmodel
-//       .find({
-//         isVisible: 1,
-//         category: `${data.category}`,
-//       })
-//       .sort({ createdAt: -1 })
-//       .limit(12);
-//     res.json({
-//       message: "get successfuly",
-//       success: true,
-//       status: 200,
-//       article: data,
-//       relatedArticles: RelatedArticles,
-//     });
-
-//     await newsmodel.findByIdAndUpdate(
-//       id,
-//       { $inc: { viewer: 1 } }, // Increment viewer count by 1
-//       { new: true } // Return the updated document
-//     );
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-const getData = async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    // Fetch the article and increment viewer count in parallel
-    const article = await newsmodel.findByIdAndUpdate(
-      id,
-      { $inc: { viewer: 1 } }, // Increment viewer count
-      { new: true } // Return the updated document
-    );
-
-    if (!article) {
-      return res.status(404).json({
-        message: "News not found",
-        success: false,
-        status: 404,
-      });
-    }
-
-    // Fetch related articles in the same category
-    const relatedArticles = await newsmodel
-      .find({
-        isVisible: 1,
-        category: article.category,
-        _id: { $ne: id }, // Exclude the current article from related articles
-      })
-      .sort({ createdAt: -1 })
-      .limit(12);
-
-    // Send the response
-    return res.status(200).json({
-      message: "Get successful",
-      success: true,
-      status: 200,
-      article,
-      relatedArticles,
-    });
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return res.status(500).json({
-      message: "Internal server error",
-      success: false,
-      status: 500,
-    });
   }
 };
 
@@ -587,30 +381,236 @@ async function updateIsVisible(req, res) {
   }
 }
 
-const increaseViewer = async (req, res) => {
-  const newsId = req.params.id;
-
+const getOne = async (req, res) => {
   try {
-    // Increment the viewer count
-    const updatedNews = await newsmodel.findByIdAndUpdate(
-      newsId,
-      { $inc: { viewer: 1 } }, // Increment viewer count by 1
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedNews) {
-      return res.status(404).json({ message: "News article not found." });
+    const id = req.params.id;
+    const news = await newsmodel.findById(id);
+    if (news == null) {
+      return res.json({
+        message: "News not found",
+        success: false,
+        status: 404,
+      });
     }
-
-    return res
-      .status(200)
-      .json({ message: "Viewer count updated.", updatedNews });
+    res.json({
+      message: "get successfuly",
+      success: true,
+      status: 200,
+      news: news,
+    });
   } catch (error) {
-    console.error("Error increasing viewer count:", error);
-    return res.status(500).json({ message: "Internal server error." });
+    console.log(error);
   }
 };
 
+// for client
+// const usergetAll = async (req, res) => {
+//   try {
+//     const news = await newsmodel.find({ isVisible: 1 });
+//     res.json({
+//       message: "successfuly",
+//       success: true,
+//       status: 200,
+//       listNews: news,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+const GetByCategoriesInHome = async (req, res) => {
+  try {
+    // Use Promise.all to fetch all categories concurrently
+    const [sportsNews, entertainmentNews, lifes, newestArticles] =
+      await Promise.all([
+        newsmodel
+          .find({ isVisible: 1, category: "កីឡា" })
+          .sort({ createdAt: -1 })
+          .limit(11),
+        newsmodel
+          .find({ isVisible: 1, category: "កម្សាន្ត" })
+          .sort({ createdAt: -1 })
+          .limit(6),
+        newsmodel
+          .find({ isVisible: 1, category: "ជីវិតនិងសង្គម" })
+          .sort({ createdAt: -1 })
+          .limit(5),
+        newsmodel.find({ isVisible: 1 }).sort({ createdAt: -1 }).limit(8),
+      ]);
+
+    res.json({
+      message: "Get success",
+      status: 200,
+      newestArticles,
+      categories: {
+        sports: sportsNews,
+        entertainment: entertainmentNews,
+        lifes: lifes,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "An error occurred while fetching news by categories",
+      status: 500,
+      error: error.message,
+    });
+  }
+};
+
+const getByCategories = async (req, res) => {
+  try {
+    const limit = 23;
+    const { startIndex, endIndex } = req.params;
+    // Ensure startIndex and endIndex are within valid range
+    const start = Math.max(parseInt(startIndex), 0);
+    const end = Math.min(parseInt(endIndex), 99); // Ensure endIndex <= 99
+
+    // Ensure total results do not exceed the limit (23)
+    const resultLimit = Math.min(end - start + 1, limit);
+
+    const list = await newsmodel.aggregate([
+      { $match: { isVisible: 1, category: req.body.categoryname } },
+      { $sort: { createdAt: -1 } },
+      { $skip: start },
+      { $limit: resultLimit },
+    ]);
+
+    res.json({ list });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const countLengthOfCategoriesAndgetPopularNews = async (req, res) => {
+  try {
+    // Using aggregation pipeline to count documents for categories and get popular news
+    const [
+      lengthOfSports,
+      lengthOfEntertainment,
+      lifes,
+      technology,
+      popularNews,
+    ] = await Promise.all([
+      newsmodel.aggregate([
+        { $match: { isVisible: 1, category: "កីឡា" } },
+        { $count: "length" }, // Count documents
+      ]),
+      newsmodel.aggregate([
+        { $match: { isVisible: 1, category: "កម្សាន្ត" } },
+        { $count: "length" }, // Count documents
+      ]),
+      newsmodel.aggregate([
+        { $match: { isVisible: 1, category: "ជីវិតនិងសង្គម" } },
+        { $count: "length" }, // Count documents
+      ]),
+      newsmodel.aggregate([
+        { $match: { isVisible: 1, category: "បច្ចេកវិទ្យា" } },
+        { $count: "length" }, // Count documents
+      ]),
+      newsmodel.aggregate([
+        { $match: { isVisible: 1 } }, // Filter for visible news
+        { $sort: { viewer: -1 } }, // Sort by viewer count descending
+        { $limit: 10 }, // Get top 10 popular news
+      ]),
+    ]);
+
+    res.json({
+      lengthOfSports: lengthOfSports[0]?.length || 0,
+      lengthOfEntertainment: lengthOfEntertainment[0]?.length || 0,
+      lengthOfLifes: lifes[0]?.length || 0,
+      lengthOfTechnology: technology[0]?.length || 0,
+      popularNews,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getData = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Fetch the article and increment viewer count in parallel
+    const article = await newsmodel.findByIdAndUpdate(
+      id,
+      { $inc: { viewer: 1 } }, // Increment viewer count
+      { new: true } // Return the updated document
+    );
+
+    if (!article) {
+      return res.status(404).json({
+        message: "News not found",
+        success: false,
+        status: 404,
+      });
+    }
+
+    // Fetch related articles in the same category
+    const relatedArticles = await newsmodel
+      .find({
+        isVisible: 1,
+        category: article.category,
+        _id: { $ne: id }, // Exclude the current article from related articles
+      })
+      .sort({ createdAt: -1 })
+      .limit(12);
+
+    // Send the response
+    return res.status(200).json({
+      message: "Get successful",
+      success: true,
+      status: 200,
+      article,
+      relatedArticles,
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+      status: 500,
+    });
+  }
+};
+
+// search
+const search = async (req, res) => {
+  try {
+    // Get the search input from query params
+    const { searchInput } = req.query;
+
+    // Check if the search input is provided
+    if (!searchInput) {
+      return res.status(400).json({
+        success: false,
+        message: "Search input is required",
+      });
+    }
+
+    // Search using regex and limit results to 5
+    const searchResults = await newsModel
+      .find({
+        title: { $regex: searchInput, $options: "i" }, // Case-insensitive search
+      })
+      .limit(5); // Limit the results to 5
+
+    // Send response back to the client
+    res.status(200).json({
+      success: true,
+      data: searchResults,
+    });
+  } catch (error) {
+    console.error("Error searching news:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// start comment
 const addComment = async (req, res) => {
   try {
     const { newsId } = req.params; // Extract news ID from URL params
@@ -1056,6 +1056,7 @@ const editReply = async (req, res) => {
 };
 
 module.exports = {
+  getOne,
   countLengthOfCategoriesAndgetPopularNews,
   getByCategories,
   GetByCategoriesInHome,
@@ -1066,7 +1067,9 @@ module.exports = {
   getData,
   create,
   updateIsVisible,
-  usergetAll,
+  // usergetAll,
+  // search
+  search,
   // commant
   addComment,
   likeOrDislikeComment,
