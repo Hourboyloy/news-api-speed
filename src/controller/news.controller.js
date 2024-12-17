@@ -1060,7 +1060,6 @@ module.exports = {
   countLengthOfCategoriesAndgetPopularNews,
   getByCategories,
   GetByCategoriesInHome,
-  increaseViewer,
   deleteNews,
   updateNews,
   admingetAll,

@@ -1,7 +1,7 @@
 const handle = require("../controller/news.controller");
 const multer_cloudinary = require("../middleware/multer_cloudinary");
 const protect_route_admin = require("../security/protect_route_admin");
-
+const project_route_user = require("../security/protect_route_user");
 const news_route = (app) => {
   //=> for admin
 
@@ -24,7 +24,7 @@ const news_route = (app) => {
 
   app.get("/api/admin-get-all", handle.admingetAll);
 
-   app.get("/api/getone/:id", handle.getOne);
+  app.get("/api/getone/:id", handle.getOne);
 
   //=> for user client
   // app.get("/api/user-get-all", handle.usergetAll);
@@ -41,34 +41,47 @@ const news_route = (app) => {
   // end maintain speed
 
   // commants
-  app.post("/api/news/:newsId/comments", handle.addComment);
+  app.post("/api/news/:newsId/comments", project_route_user, handle.addComment);
 
   app.post(
     "/api/news/:newsId/comments/:commentId/reply",
+    project_route_user,
     handle.replyToComment
   );
 
   // action
   app.post(
     "/api/news/:newsId/comments/:commentId/like-dislike",
+    project_route_user,
     handle.likeOrDislikeComment
   );
   app.post(
     "/api/news/:newsId/comments/:commentId/replies/:replyId/like-dislike",
+    project_route_user,
     handle.likeOrDislikeReply
   );
 
   // remove
-  app.delete("/api/news/:newsId/comment/:commentId", handle.removeComment);
+  app.delete(
+    "/api/news/:newsId/comment/:commentId",
+    project_route_user,
+    handle.removeComment
+  );
 
   app.delete(
     "/api/news/:newsId/comment/:commentId/reply/:replyId",
+    project_route_user,
     handle.removeReply
   );
 
-  app.put("/news/:newsId/comment/:commentId", handle.editComment);
+  app.put(
+    "/news/:newsId/comment/:commentId",
+    project_route_user,
+    handle.editComment
+  );
   app.put(
     "/news/:newsId/comment/:commentId/replies/:replyId",
+    project_route_user,
     handle.editReply
   );
 };
