@@ -28,7 +28,7 @@ const news_route = (app) => {
 
   //=> for user client
   // app.get("/api/user-get-all", handle.usergetAll);
-  app.get("/search-news", handle.search);
+  app.post("/search-news", handle.search);
   app.get("/api/get-data/:id", handle.getData);
 
   // start maintain speed
