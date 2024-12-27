@@ -40,6 +40,9 @@ const news_route = (app) => {
   app.post("/api/categories/:startIndex/:endIndex", handle.getByCategories);
   // end maintain speed
 
+
+
+  
   // commants
   app.post("/api/news/:newsId/comments", project_route_user, handle.addComment);
 

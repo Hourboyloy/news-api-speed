@@ -579,7 +579,7 @@ const getData = async (req, res) => {
 const search = async (req, res) => {
   try {
     // Get the search input from query params
-    const { searchInput } = req.query;
+    const { searchInput } = req.body;
 
     // Check if the search input is provided
     if (!searchInput) {
@@ -590,7 +590,7 @@ const search = async (req, res) => {
     }
 
     // Search using regex and limit results to 5
-    const searchResults = await newsModel
+    const searchResults = await newsmodel
       .find({
         title: { $regex: searchInput, $options: "i" }, // Case-insensitive search
       })
